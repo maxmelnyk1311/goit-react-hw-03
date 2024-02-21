@@ -1,0 +1,8 @@
+.optionsList {
+    display: flex;
+    gap: 5px;
+}
+
+.optionButtonText::first-letter {
+    text-transform: capitalize;
+}
