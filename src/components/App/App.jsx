@@ -1,105 +1,85 @@
 import { useState, useEffect } from 'react';
 
-import Description from '../Description/Description.jsx';
-import Options from '../Options/Options.jsx';
-import Feedback from '../Feedback/Feedback.jsx';
-import Notification from '../Feedback/Notification.jsx';
+import ContactList from '../ContactList/ContactList.jsx';
+import SearchBox from '../SearchBox/SearchBox.jsx';
+import ContactForm from '../ContactForm/ContactForm.jsx';
 
-const descriptionHeaderText = "Sip Happens Café";
-const descriptionText = "Please leave your feedback about our service by selecting one of the options below.";
-const noFeedbackText = "No feedback yet";
-const KEY = "saved-feedbacks";
+const searchBarTxt = "Find contacts by name";
+const KEY = "saved-contacts";
 
 export default function App() {
-  const [feedbacks, setFeedbacks] = useState(() => {
-    const savedFeedbacks = window.localStorage.getItem(KEY);
-    if (savedFeedbacks !== null) {
-      return JSON.parse(savedFeedbacks);
+  const [contacts, setContacts] = useState(() => {
+    const savedContacts = window.localStorage.getItem(KEY);
+    if (savedContacts !== null) {
+      return JSON.parse(savedContacts);
     }
-    return {
-      good: 0,
-      neutral: 0,
-      bad: 0
-    }
+    return [
+      {id: 'id-1', name: 'Rosie Simpson', number: '459-12-56'},
+      {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
+      {id: 'id-3', name: 'Eden Clements', number: '645-17-79'},
+      {id: 'id-4', name: 'Annie Copeland', number: '227-91-26'},
+    ]
   });
 
-  function updateGoodFeedback() {
-    setFeedbacks({
-      ...feedbacks,
-      good: feedbacks.good + 1
-    });
-  }
+  const [inputItems, setInputChanges] = useState({
+    inputValue: "",
+    contactsForFilter: contacts,
+  });
 
-  function updateNeutralFeedback() {
-    setFeedbacks({
-      ...feedbacks,
-      neutral: feedbacks.neutral + 1
+  const handleChange = (event) => {
+    const currentInputValue = event.target.value;
+    setInputChanges({
+      ...inputItems,
+      inputValue: inputItems.inputValue = currentInputValue
     });
-  }
-
-  function updateBadFeedback() {
-    setFeedbacks({
-      ...feedbacks,
-      bad: feedbacks.bad + 1
-    });
-  }  
-
-  function resetFeedbacks() {
-    setFeedbacks({
-      good: 0,
-      neutral: 0,
-      bad: 0
+    const filteredByQueryContacts = inputItems.contactsForFilter.filter((contact) => contact.name.toLowerCase().includes(currentInputValue.toLowerCase()));
+    console.log(filteredByQueryContacts);
+    if (inputItems.inputValue == "") {
+      setInputChanges({
+        ...inputItems,
+        contactsForFilter: inputItems.contactsForFilter = contacts
+      })
+    } else {
+      setInputChanges({
+        ...inputItems,
+        contactsForFilter: inputItems.contactsForFilter = filteredByQueryContacts
     })
-  }
-
-  function updateFeedback(feedbackType) {
-    switch(feedbackType) {
-      case 'good':
-        updateGoodFeedback();
-        break;
-      
-      case 'neutral':
-        updateNeutralFeedback();
-        break;
-
-      case 'bad':
-        updateBadFeedback();
-        break;
-
-      default: console.log('something is wrong!');
     }
-  }
+  };
 
-  const totalFeedbacks = feedbacks.good + feedbacks.neutral + feedbacks.bad;
+  function addNewContact(formData) {
+    setContacts([
+      ...contacts,
+      formData
+    ]);
+  }
 
   useEffect(() => {
-    window.localStorage.setItem(KEY, JSON.stringify(feedbacks));
-  }, [feedbacks]);
+    window.localStorage.setItem(KEY, JSON.stringify(contacts));
+  }, [contacts]);
+
+  function deleteContact(event) {
+    const contactToDelete = event.target.id;
+    const contactsAfterDelete = contacts.filter((contact) => contact.id !== contactToDelete);
+    setContacts(contactsAfterDelete);
+  }
 
   return (
-    <>
-      <Description 
-        headerText={descriptionHeaderText}
-        descriptionText={descriptionText}
+    <div>
+      <h1>Phonebook</h1>
+      <ContactForm 
+        onSubmit={addNewContact}
       />
-      <Options 
-        feedbacks={feedbacks} 
-        onUpdate={updateFeedback} 
-        onReset={resetFeedbacks}
-        totalFeedbacks={totalFeedbacks}
+      <SearchBox 
+        searchBarTxt={searchBarTxt}
+        inputValue={inputItems.inputValue}
+        handleChange={handleChange}
       />
-      {totalFeedbacks > 0 
-        ? 
-        <Feedback 
-          feedbacks={feedbacks} 
-          totalFeedbacks={totalFeedbacks} 
-        />
-        :
-        <Notification 
-          notificationText={noFeedbackText}
-        />
-      }
-    </>
+      <ContactList 
+        contacts={inputItems.inputValue == "" ? contacts : inputItems.contactsForFilter}
+        deleteContact={deleteContact}
+      />
+    </div>
   )
 }
 
