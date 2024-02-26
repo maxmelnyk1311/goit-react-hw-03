@@ -21,31 +21,17 @@ export default function App() {
     ]
   });
 
-  const [inputItems, setInputChanges] = useState({
-    inputValue: "",
-    contactsForFilter: contacts,
-  });
+  const [inputValue, setInputChanges] = useState("");
 
   const handleChange = (event) => {
-    const currentInputValue = event.target.value;
-    setInputChanges({
-      ...inputItems,
-      inputValue: inputItems.inputValue = currentInputValue
-    });
-    const filteredByQueryContacts = inputItems.contactsForFilter.filter((contact) => contact.name.toLowerCase().includes(currentInputValue.toLowerCase()));
-    console.log(filteredByQueryContacts);
-    if (inputItems.inputValue == "") {
-      setInputChanges({
-        ...inputItems,
-        contactsForFilter: inputItems.contactsForFilter = contacts
-      })
-    } else {
-      setInputChanges({
-        ...inputItems,
-        contactsForFilter: inputItems.contactsForFilter = filteredByQueryContacts
-    })
-    }
+    setInputChanges(event.target.value);
   };
+
+  const contactsFilter = (value) => {
+    return (contacts.filter((contact) => contact.name.toLowerCase().includes(value.toLowerCase())));
+  }  
+
+  const filteredContacts = contactsFilter(inputValue);
 
   function addNewContact(formData) {
     setContacts([
@@ -58,9 +44,8 @@ export default function App() {
     window.localStorage.setItem(KEY, JSON.stringify(contacts));
   }, [contacts]);
 
-  function deleteContact(event) {
-    const contactToDelete = event.target.id;
-    const contactsAfterDelete = contacts.filter((contact) => contact.id !== contactToDelete);
+  function deleteContact(idToDelete) {
+    const contactsAfterDelete = contacts.filter((contact) => contact.id !== idToDelete);
     setContacts(contactsAfterDelete);
   }
 
@@ -72,11 +57,11 @@ export default function App() {
       />
       <SearchBox 
         searchBarTxt={searchBarTxt}
-        inputValue={inputItems.inputValue}
+        inputValue={inputValue}
         handleChange={handleChange}
       />
       <ContactList 
-        contacts={inputItems.inputValue == "" ? contacts : inputItems.contactsForFilter}
+        contacts={inputValue == "" ? contacts : filteredContacts}
         deleteContact={deleteContact}
       />
     </div>

@@ -15,7 +15,7 @@ export default function ContactForm({onSubmit}) {
     };
     const validationSchema = Yup.object().shape({
         name: Yup.string().min(3, "Too Short name").max(50, "Too Long name!").required("Name is required!"),
-        number: Yup.number().min(1000000, "Too Short number!").max(9999999, "Too Long number!").required("Number is required!"),
+        number: Yup.string().min(3, "Too Short number!").max(50, "Too Long number!").required("Number is required!"),
     });
 
     const handleSubmit = (values, actions) => {
@@ -43,7 +43,7 @@ export default function ContactForm({onSubmit}) {
                 <ErrorMessage name="name" as="span" />
                 <label htmlFor={numberFieldId}>Number</label>
                 <Field 
-                    type="number" 
+                    type="text" 
                     name="number"
                     id={numberFieldId}
                 />
